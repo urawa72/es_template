@@ -1,0 +1,78 @@
+version: '3.7'
+services:
+  # Elasticsearch
+  es_1:
+    image: es_7_6_2
+    container_name: es_1
+    environment:
+      - node.name=es_1
+      - cluster.name=play-cluster
+      - cluster.initial_master_nodes=es_1
+      - discovery.seed_hosts=es_1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./es_data_1:/usr/share/elasticsearch/data
+    networks:
+      - es_net
+
+  es_2:
+    image: es_7_6_2
+    container_name: es_2
+    environment:
+      - node.name=es_2
+      - cluster.name=play-cluster
+      - cluster.initial_master_nodes=es_1
+      - discovery.seed_hosts=es_1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./es_data_2:/usr/share/elasticsearch/data
+    networks:
+      - es_net
+
+  es_3:
+    image: es_7_6_2
+    container_name: es_3
+    environment:
+      - node.name=es_3
+      - cluster.name=play-cluster
+      - cluster.initial_master_nodes=es_1
+      - discovery.seed_hosts=es_1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./es_data_3:/usr/share/elasticsearch/data
+    networks:
+      - es_net
+
+  # kibana
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.6.2
+    container_name: kibana
+    environment:
+      SERVER_NAME: localhost:5601
+      ELASTICSEARCH_HOSTS: http://es_1:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - es_1
+    networks:
+      - es_net
+
+networks:
+  es_net:
